@@ -21,7 +21,7 @@ cordova run ios
 ```
 
 
-Will use `www/data/2017-07-03_spain_barcelona.mbtiles` as sample data source, and `www/styles/osm-bright/style-offline.json`
+Will use `www/2017-07-03_spain_barcelona.mbtiles` as sample data source, and `www/styles/osm-bright/style-offline.json`
 as style, both coming from the OpenMapTiles project: https://openmaptiles.org/
 
 
@@ -61,7 +61,7 @@ and the location to the mbtiles file as a relative path:
 "sources": {
     "openmaptiles": {
         "type": "mbtiles",
-        "path": "data/2017-07-03_spain_barcelona.mbtiles"
+        "path": "2017-07-03_spain_barcelona.mbtiles"
     }
 }
 ```
