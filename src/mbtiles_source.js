@@ -1,6 +1,7 @@
 import VectorTileSource from 'mapbox-gl/src/source/vector_tile_source'
 import pako from 'pako/lib/inflate'
 import base64js from 'base64-js'
+import Database from './database'
 
 class MBTilesSource extends VectorTileSource {
 
@@ -10,36 +11,12 @@ class MBTilesSource extends VectorTileSource {
         this.db = this.openDatabase(options.path);
     }
 
-    openDatabase(dbName) {
-        const source = this;
-        if ('sqlitePlugin' in self) {
-            if('device' in self) {
-                return new Promise(function (resolve, reject) {
-                    const params = { name: dbName, location: 'default' };
-                    sqlitePlugin.openDatabase(params, resolve, reject);
-                });
-            } else {
-                return Promise.reject(new Error("cordova-plugin-device not available. " +
-                    "Please install the plugin and make sure this code is run after onDeviceReady event"));
-            }
-        } else {
-            return Promise.reject(new Error("cordova-sqlite-ext plugin not available. " +
-                "Please install the plugin and make sure this code is run after onDeviceReady event"));
-        }
+    openDatabase(dbLocation) {
+        return Database.openDatabase(dbLocation)
     }
 
     copyDatabaseFile(dbLocation, dbName, targetDir) {
-        console.log("Copying database to application storage directory");
-        return new Promise(function (resolve, reject) {
-            const absPath =  cordova.file.applicationDirectory + 'www/' + dbLocation;
-            resolveLocalFileSystemURL(absPath, resolve, reject);
-        }).then(function (sourceFile) {
-            return new Promise(function (resolve, reject) {
-                sourceFile.copyTo(targetDir, dbName, resolve, reject);
-            }).then(function () {
-                console.log("Database copied");
-            });
-        });
+        return Database.copyDatabaseFile(dbLocation, dbName, targetDir)
     }
 
     readTile(z, x, y, callback) {
