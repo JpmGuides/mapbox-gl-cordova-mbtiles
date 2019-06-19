@@ -39656,6 +39656,7 @@ var language = function () {
     };
 };
 
+exported.Database = __chunk_1.Database;
 exported.OfflineMap = OfflineMap;
 language(exported);
 
