@@ -17266,44 +17266,45 @@ function shapeIcon(image, iconOffset, iconAnchor) {
 
 var Database = function Database () {};
 
+Database.getDatabaseDir = function getDatabaseDir () {
+    if (!('sqlitePlugin' in self)) {
+        return Promise.reject(new Error('cordova-sqlite-ext plugin not available. ' + 'Please install the plugin and make sure this code is run after onDeviceReady event'));
+    }
+    if (!('device' in self)) {
+        return Promise.reject(new Error('cordova-plugin-device not available. ' + 'Please install the plugin and make sure this code is run after onDeviceReady event'));
+    }
+    return new Promise(function (resolve, reject) {
+        if (device.platform === 'Android') {
+            resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function (dir) {
+                dir.getDirectory('databases', { create: true }, function (subdir) {
+                    resolve(subdir);
+                });
+            }, reject);
+        } else if (device.platform === 'iOS') {
+            resolveLocalFileSystemURL(cordova.file.documentsDirectory, resolve, reject);
+        } else {
+            reject('Platform not supported');
+        }
+    });
+};
 Database.openDatabase = function openDatabase (dbLocation) {
     var dbName = dbLocation.split('/').slice(-1)[0];
     var source = this;
-    if ('sqlitePlugin' in self) {
-        if ('device' in self) {
-            return new Promise(function (resolve, reject) {
-                if (device.platform === 'Android') {
-                    resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function (dir) {
-                        dir.getDirectory('databases', { create: true }, function (subdir) {
-                            resolve(subdir);
-                        });
-                    }, reject);
-                } else if (device.platform === 'iOS') {
-                    resolveLocalFileSystemURL(cordova.file.documentsDirectory, resolve, reject);
-                } else {
-                    reject('Platform not supported');
-                }
-            }).then(function (targetDir) {
-                return new Promise(function (resolve, reject) {
-                    targetDir.getFile(dbName, {}, resolve, reject);
-                }).catch(function () {
-                    return source.copyDatabaseFile(dbLocation, dbName, targetDir);
-                });
-            }).then(function () {
-                var params = { name: dbName };
-                if (device.platform === 'iOS') {
-                    params.iosDatabaseLocation = 'Documents';
-                } else {
-                    params.location = 'default';
-                }
-                return sqlitePlugin.openDatabase(params);
-            });
+    return this.getDatabaseDir().then(function (targetDir) {
+        return new Promise(function (resolve, reject) {
+            targetDir.getFile(dbName, {}, resolve, reject);
+        }).catch(function () {
+            return source.copyDatabaseFile(dbLocation, dbName, targetDir);
+        });
+    }).then(function () {
+        var params = { name: dbName };
+        if (device.platform === 'iOS') {
+            params.iosDatabaseLocation = 'Documents';
         } else {
-            return Promise.reject(new Error('cordova-plugin-device not available. ' + 'Please install the plugin and make sure this code is run after onDeviceReady event'));
+            params.location = 'default';
         }
-    } else {
-        return Promise.reject(new Error('cordova-sqlite-ext plugin not available. ' + 'Please install the plugin and make sure this code is run after onDeviceReady event'));
-    }
+        return sqlitePlugin.openDatabase(params);
+    });
 };
 Database.copyDatabaseFile = function copyDatabaseFile (dbLocation, dbName, targetDir) {
     console.log('Copying database to application storage directory');
@@ -39385,8 +39386,12 @@ var MBTilesSource = (function (VectorTileSource$$1) {
                 txn.executeSql(query, params, function (tx, res) {
                     if (res.rows.length) {
                         var base64Data = res.rows.item(0).base64_tile_data;
-                        var rawData = inflate_1$1.inflate(base64Js.toByteArray(base64Data));
-                        callback(undefined, base64Js.fromByteArray(rawData));
+                        try {
+                            var rawData = inflate_1$1.inflate(base64Js.toByteArray(base64Data));
+                            callback(undefined, base64Js.fromByteArray(rawData));
+                        } catch (err) {
+                            callback(undefined, base64Data);
+                        }
                     } else {
                         callback(new Error('tile ' + params.join(',') + ' not found'));
                     }
