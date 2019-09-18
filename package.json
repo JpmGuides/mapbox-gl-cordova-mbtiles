@@ -10,7 +10,7 @@
     "build-dev": "rollup -c --environment BUILD:dev --watch",
     "build": "rollup -c --environment BUILD:production",
     "build-prod-min": "rollup -c --environment BUILD:production,MINIFY:true",
-    "build-all":"rollup -c --environment BUILD:dev && rollup -c --environment BUILD:production,MINIFY:true && rollup -c --environment BUILD:dev"
+    "build-all":"rollup -c --environment BUILD:production && rollup -c --environment BUILD:production,MINIFY:true && rollup -c --environment BUILD:dev"
   },
   "keywords": [],
   "author": "Oscar Fonts <oscar.fonts@geomati.co>",
