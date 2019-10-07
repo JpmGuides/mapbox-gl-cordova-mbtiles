@@ -17361,8 +17361,12 @@ var RasterTileSourceOffline = (function (RasterTileSource$$1) {
                 tile.state = 'unloaded';
                 callback(null);
             } else if (err) {
-                tile.state = 'errored';
-                callback(err);
+                if (this.url) {
+                    RasterTileSource$$1.prototype.loadTile.call(this, tile, callback);
+                } else {
+                    tile.state = 'errored';
+                    callback(err);
+                }
             } else if (img) {
                 if (this.map._refreshExpiredTiles)
                     { tile.setExpiryData(img); }
@@ -17406,12 +17410,16 @@ var RasterTileSourceOffline = (function (RasterTileSource$$1) {
                             expires: null
                         });
                     } else {
-                        console.error('tile ' + params.join(',') + ' not found');
-                        callback(undefined, {
-                            data: this$1._transparentPngUrl,
-                            cacheControl: null,
-                            expires: null
-                        });
+                        if (this$1.url) {
+                            callback(new Error('tile ' + params.join(',') + ' not found'));
+                        } else {
+                            console.error('tile ' + params.join(',') + ' not found');
+                            callback(undefined, {
+                                data: this$1._transparentPngUrl,
+                                cacheControl: null,
+                                expires: null
+                            });
+                        }
                     }
                 });
             }, function (error) {
@@ -39412,7 +39420,11 @@ var MBTilesSource = (function (VectorTileSource$$1) {
         this.readTile(z, x, y, dispatch.bind(this));
         function dispatch(err, base64Data) {
             if (err) {
-                return callback(err);
+                if (this.url) {
+                    return VectorTileSource$$1.prototype.loadTile.call(this, tile, callback);
+                } else {
+                    return callback(err);
+                }
             }
             if (base64Data === undefined) {
                 return callback(new Error('empty data'));
