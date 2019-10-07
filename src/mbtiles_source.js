@@ -58,7 +58,11 @@ class MBTilesSource extends VectorTileSource {
 
         function dispatch(err, base64Data) {
             if (err) {
-                return callback(err);
+                if (this.url) {
+                  return super.loadTile(tile, callback);
+                } else {
+                  return callback(err);
+                }
             }
             if (base64Data === undefined) {
               return callback(new Error("empty data"));

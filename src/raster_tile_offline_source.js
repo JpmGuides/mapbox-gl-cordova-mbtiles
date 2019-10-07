@@ -46,8 +46,13 @@ class RasterTileSourceOffline extends RasterTileSource {
                 tile.state = 'unloaded';
                 callback(null);
             } else if (err) {
-                tile.state = 'errored';
-                callback(err);
+                if (this.url) {
+                  // Not in cache, try online.
+                  super.loadTile(tile, callback);
+                } else {
+                  tile.state = 'errored';
+                  callback(err);
+                }
             } else if (img) {
                 if (this.map._refreshExpiredTiles) tile.setExpiryData(img);
                 delete img.cacheControl;
@@ -96,13 +101,17 @@ class RasterTileSourceOffline extends RasterTileSource {
                             });
 
                     } else {
-                        console.error('tile ' + params.join(',') + ' not found');
-                        callback(undefined,
-                            {
-                                data: this._transparentPngUrl,
-                                cacheControl: null,
-                                expires: null
-                            });
+                        if (this.url) {
+                          callback(new Error('tile ' + params.join(',') + ' not found'));
+                        } else {
+                          console.error('tile ' + params.join(',') + ' not found');
+                          callback(undefined,
+                              {
+                                  data: this._transparentPngUrl,
+                                  cacheControl: null,
+                                  expires: null
+                              });
+                        }
                     }
                 });
             }, (error) => {
