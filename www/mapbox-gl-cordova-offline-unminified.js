@@ -1,4 +1,4 @@
-/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.2.1/LICENSE.txt */
+/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.3.0/LICENSE.txt */
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 typeof define === 'function' && define.amd ? define(factory) :
@@ -967,7 +967,8 @@ function makeXMLHttpRequest(requestParameters, callback) {
         callback(new Error(xhr.statusText));
     };
     xhr.onload = function () {
-        if ((xhr.status >= 200 && xhr.status < 300 || xhr.status === 0) && xhr.response !== null) {
+        var isFile = xhr.responseURL.indexOf('file://') === 0;
+        if ((xhr.status >= 200 && xhr.status < 300 || isFile || xhr.status === 0) && xhr.response !== null) {
             var data = xhr.response;
             if (requestParameters.type === 'json') {
                 try {
@@ -1186,15 +1187,16 @@ Evented.prototype.setEventedParent = function setEventedParent (parent, data) {
 var $version = 8;
 var $root = {"version":{"required":true,"type":"enum","values":[8]},"name":{"type":"string"},"metadata":{"type":"*"},"center":{"type":"array","value":"number"},"zoom":{"type":"number"},"bearing":{"type":"number","default":0,"period":360,"units":"degrees"},"pitch":{"type":"number","default":0,"units":"degrees"},"light":{"type":"light"},"sources":{"required":true,"type":"sources"},"sprite":{"type":"string"},"glyphs":{"type":"string"},"transition":{"type":"transition"},"layers":{"required":true,"type":"array","value":"layer"}};
 var sources = {"*":{"type":"source"}};
-var source = ["source_vector","source_raster","source_raster_dem","source_geojson","source_video","source_image"];
+var source = ["source_vector","source_raster","source_raster_dem","source_geojson","source_video","source_image","source_mbtiles"];
+var source_mbtiles = {"type":{"required":true,"type":"enum","values":{"mbtiles":{}}},"attribution":{"type":"string"},"path":{"type":"string"}};
 var source_vector = {"type":{"required":true,"type":"enum","values":{"vector":{}}},"url":{"type":"string"},"tiles":{"type":"array","value":"string"},"bounds":{"type":"array","value":"number","length":4,"default":[-180,-85.051129,180,85.051129]},"scheme":{"type":"enum","values":{"xyz":{},"tms":{}},"default":"xyz"},"minzoom":{"type":"number","default":0},"maxzoom":{"type":"number","default":22},"attribution":{"type":"string"},"*":{"type":"*"}};
 var source_raster = {"type":{"required":true,"type":"enum","values":{"raster":{}}},"url":{"type":"string"},"tiles":{"type":"array","value":"string"},"bounds":{"type":"array","value":"number","length":4,"default":[-180,-85.051129,180,85.051129]},"minzoom":{"type":"number","default":0},"maxzoom":{"type":"number","default":22},"tileSize":{"type":"number","default":512,"units":"pixels"},"scheme":{"type":"enum","values":{"xyz":{},"tms":{}},"default":"xyz"},"attribution":{"type":"string"},"*":{"type":"*"}};
 var source_raster_dem = {"type":{"required":true,"type":"enum","values":{"raster-dem":{}}},"url":{"type":"string"},"tiles":{"type":"array","value":"string"},"bounds":{"type":"array","value":"number","length":4,"default":[-180,-85.051129,180,85.051129]},"minzoom":{"type":"number","default":0},"maxzoom":{"type":"number","default":22},"tileSize":{"type":"number","default":512,"units":"pixels"},"attribution":{"type":"string"},"encoding":{"type":"enum","values":{"terrarium":{},"mapbox":{}},"default":"mapbox"},"*":{"type":"*"}};
 var source_geojson = {"type":{"required":true,"type":"enum","values":{"geojson":{}}},"data":{"type":"*"},"maxzoom":{"type":"number","default":18},"attribution":{"type":"string"},"buffer":{"type":"number","default":128,"maximum":512,"minimum":0},"tolerance":{"type":"number","default":0.375},"cluster":{"type":"boolean","default":false},"clusterRadius":{"type":"number","default":50,"minimum":0},"clusterMaxZoom":{"type":"number"},"clusterProperties":{"type":"*"},"lineMetrics":{"type":"boolean","default":false},"generateId":{"type":"boolean","default":false}};
 var source_video = {"type":{"required":true,"type":"enum","values":{"video":{}}},"urls":{"required":true,"type":"array","value":"string"},"coordinates":{"required":true,"type":"array","length":4,"value":{"type":"array","length":2,"value":"number"}}};
 var source_image = {"type":{"required":true,"type":"enum","values":{"image":{}}},"url":{"required":true,"type":"string"},"coordinates":{"required":true,"type":"array","length":4,"value":{"type":"array","length":2,"value":"number"}}};
-var layer = {"id":{"type":"string","required":true},"type":{"type":"enum","values":{"fill":{},"line":{},"symbol":{},"circle":{},"heatmap":{},"fill-extrusion":{},"raster":{},"hillshade":{},"background":{}},"required":true},"metadata":{"type":"*"},"source":{"type":"string"},"source-layer":{"type":"string"},"minzoom":{"type":"number","minimum":0,"maximum":24},"maxzoom":{"type":"number","minimum":0,"maximum":24},"filter":{"type":"filter"},"layout":{"type":"layout"},"paint":{"type":"paint"}};
-var layout = ["layout_fill","layout_line","layout_circle","layout_heatmap","layout_fill-extrusion","layout_symbol","layout_raster","layout_hillshade","layout_background"];
+var layer = {"id":{"type":"string","required":true},"type":{"type":"enum","values":{"fill":{},"line":{},"symbol":{},"circle":{},"heatmap":{},"fill-extrusion":{},"raster":{},"hillshade":{},"custom-webgl":{},"background":{}},"required":true},"metadata":{"type":"*"},"source":{"type":"string"},"source-layer":{"type":"string"},"minzoom":{"type":"number","minimum":0,"maximum":24},"maxzoom":{"type":"number","minimum":0,"maximum":24},"filter":{"type":"filter"},"layout":{"type":"layout"},"paint":{"type":"paint"}};
+var layout = ["layout_fill","layout_line","layout_circle","layout_heatmap","layout_fill-extrusion","layout_symbol","layout_raster","layout_hillshade","layout_background","layout_custom-webgl"];
 var layout_background = {"visibility":{"type":"enum","values":{"visible":{},"none":{}},"default":"visible","property-type":"constant"}};
 var layout_fill = {"visibility":{"type":"enum","values":{"visible":{},"none":{}},"default":"visible","property-type":"constant"}};
 var layout_circle = {"visibility":{"type":"enum","values":{"visible":{},"none":{}},"default":"visible","property-type":"constant"}};
@@ -1210,7 +1212,7 @@ var function_stop = {"type":"array","minimum":0,"maximum":22,"value":["number","
 var expression = {"type":"array","value":"*","minimum":1};
 var expression_name = {"type":"enum","values":{"let":{"group":"Variable binding"},"var":{"group":"Variable binding"},"literal":{"group":"Types"},"array":{"group":"Types"},"at":{"group":"Lookup"},"case":{"group":"Decision"},"match":{"group":"Decision"},"coalesce":{"group":"Decision"},"step":{"group":"Ramps, scales, curves"},"interpolate":{"group":"Ramps, scales, curves"},"interpolate-hcl":{"group":"Ramps, scales, curves"},"interpolate-lab":{"group":"Ramps, scales, curves"},"ln2":{"group":"Math"},"pi":{"group":"Math"},"e":{"group":"Math"},"typeof":{"group":"Types"},"string":{"group":"Types"},"number":{"group":"Types"},"boolean":{"group":"Types"},"object":{"group":"Types"},"collator":{"group":"Types"},"format":{"group":"Types"},"number-format":{"group":"Types"},"to-string":{"group":"Types"},"to-number":{"group":"Types"},"to-boolean":{"group":"Types"},"to-rgba":{"group":"Color"},"to-color":{"group":"Types"},"rgb":{"group":"Color"},"rgba":{"group":"Color"},"get":{"group":"Lookup"},"has":{"group":"Lookup"},"length":{"group":"Lookup"},"properties":{"group":"Feature data"},"feature-state":{"group":"Feature data"},"geometry-type":{"group":"Feature data"},"id":{"group":"Feature data"},"zoom":{"group":"Zoom"},"heatmap-density":{"group":"Heatmap"},"line-progress":{"group":"Feature data"},"accumulated":{"group":"Feature data"},"+":{"group":"Math"},"*":{"group":"Math"},"-":{"group":"Math"},"/":{"group":"Math"},"%":{"group":"Math"},"^":{"group":"Math"},"sqrt":{"group":"Math"},"log10":{"group":"Math"},"ln":{"group":"Math"},"log2":{"group":"Math"},"sin":{"group":"Math"},"cos":{"group":"Math"},"tan":{"group":"Math"},"asin":{"group":"Math"},"acos":{"group":"Math"},"atan":{"group":"Math"},"min":{"group":"Math"},"max":{"group":"Math"},"round":{"group":"Math"},"abs":{"group":"Math"},"ceil":{"group":"Math"},"floor":{"group":"Math"},"==":{"group":"Decision"},"!=":{"group":"Decision"},">":{"group":"Decision"},"<":{"group":"Decision"},">=":{"group":"Decision"},"<=":{"group":"Decision"},"all":{"group":"Decision"},"any":{"group":"Decision"},"!":{"group":"Decision"},"is-supported-script":{"group":"String"},"upcase":{"group":"String"},"downcase":{"group":"String"},"concat":{"group":"String"},"resolved-locale":{"group":"String"}}};
 var light = {"anchor":{"type":"enum","default":"viewport","values":{"map":{},"viewport":{}},"property-type":"data-constant","transition":false,"expression":{"interpolated":false,"parameters":["zoom"]}},"position":{"type":"array","default":[1.15,210,30],"length":3,"value":"number","property-type":"data-constant","transition":true,"expression":{"interpolated":true,"parameters":["zoom"]}},"color":{"type":"color","property-type":"data-constant","default":"#ffffff","expression":{"interpolated":true,"parameters":["zoom"]},"transition":true},"intensity":{"type":"number","property-type":"data-constant","default":0.5,"minimum":0,"maximum":1,"expression":{"interpolated":true,"parameters":["zoom"]},"transition":true}};
-var paint = ["paint_fill","paint_line","paint_circle","paint_heatmap","paint_fill-extrusion","paint_symbol","paint_raster","paint_hillshade","paint_background"];
+var paint = ["paint_fill","paint_line","paint_circle","paint_heatmap","paint_fill-extrusion","paint_symbol","paint_raster","paint_hillshade","paint_background","paint_custom-webgl"];
 var paint_fill = {"fill-antialias":{"type":"boolean","default":true,"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"fill-opacity":{"type":"number","default":1,"minimum":0,"maximum":1,"transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-color":{"type":"color","default":"#000000","transition":true,"requires":[{"!":"fill-pattern"}],"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-outline-color":{"type":"color","transition":true,"requires":[{"!":"fill-pattern"},{"fill-antialias":true}],"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-translate":{"type":"array","value":"number","length":2,"default":[0,0],"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom"]},"property-type":"data-constant"},"fill-translate-anchor":{"type":"enum","values":{"map":{},"viewport":{}},"default":"map","requires":["fill-translate"],"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"fill-pattern":{"type":"string","transition":true,"expression":{"interpolated":false,"parameters":["zoom","feature"]},"property-type":"cross-faded-data-driven"}};
 var paint_line = {"line-opacity":{"type":"number","default":1,"minimum":0,"maximum":1,"transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-color":{"type":"color","default":"#000000","transition":true,"requires":[{"!":"line-pattern"}],"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-translate":{"type":"array","value":"number","length":2,"default":[0,0],"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom"]},"property-type":"data-constant"},"line-translate-anchor":{"type":"enum","values":{"map":{},"viewport":{}},"default":"map","requires":["line-translate"],"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"line-width":{"type":"number","default":1,"minimum":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-gap-width":{"type":"number","default":0,"minimum":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-offset":{"type":"number","default":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-blur":{"type":"number","default":0,"minimum":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"line-dasharray":{"type":"array","value":"number","minimum":0,"transition":true,"units":"line widths","requires":[{"!":"line-pattern"}],"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"cross-faded"},"line-pattern":{"type":"string","transition":true,"expression":{"interpolated":false,"parameters":["zoom","feature"]},"property-type":"cross-faded-data-driven"},"line-gradient":{"type":"color","transition":false,"requires":[{"!":"line-dasharray"},{"!":"line-pattern"},{"source":"geojson","has":{"lineMetrics":true}}],"expression":{"interpolated":true,"parameters":["line-progress"]},"property-type":"color-ramp"}};
 var paint_circle = {"circle-radius":{"type":"number","default":5,"minimum":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-color":{"type":"color","default":"#000000","transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-blur":{"type":"number","default":0,"transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-opacity":{"type":"number","default":1,"minimum":0,"maximum":1,"transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-translate":{"type":"array","value":"number","length":2,"default":[0,0],"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom"]},"property-type":"data-constant"},"circle-translate-anchor":{"type":"enum","values":{"map":{},"viewport":{}},"default":"map","requires":["circle-translate"],"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"circle-pitch-scale":{"type":"enum","values":{"map":{},"viewport":{}},"default":"map","expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"circle-pitch-alignment":{"type":"enum","values":{"map":{},"viewport":{}},"default":"viewport","expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"circle-stroke-width":{"type":"number","default":0,"minimum":0,"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-stroke-color":{"type":"color","default":"#000000","transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"circle-stroke-opacity":{"type":"number","default":1,"minimum":0,"maximum":1,"transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"}};
@@ -1225,6 +1227,7 @@ var spec = {
 	$root: $root,
 	sources: sources,
 	source: source,
+	source_mbtiles: source_mbtiles,
 	source_vector: source_vector,
 	source_raster: source_raster,
 	source_raster_dem: source_raster_dem,
@@ -1258,9 +1261,11 @@ var spec = {
 	paint_hillshade: paint_hillshade,
 	paint_background: paint_background,
 	transition: transition,
+	"layout_custom-webgl": {"visibility":{"type":"enum","values":{"visible":{},"none":{}},"default":"visible"}},
 	"layout_fill-extrusion": {"visibility":{"type":"enum","values":{"visible":{},"none":{}},"default":"visible","property-type":"constant"}},
 	"function": {"expression":{"type":"expression"},"stops":{"type":"array","value":"function_stop"},"base":{"type":"number","default":1,"minimum":0},"property":{"type":"string","default":"$zoom"},"type":{"type":"enum","values":{"identity":{},"exponential":{},"interval":{},"categorical":{}},"default":"exponential"},"colorSpace":{"type":"enum","values":{"rgb":{},"lab":{},"hcl":{}},"default":"rgb"},"default":{"type":"*","required":false}},
 	"paint_fill-extrusion": {"fill-extrusion-opacity":{"type":"number","default":1,"minimum":0,"maximum":1,"transition":true,"expression":{"interpolated":true,"parameters":["zoom"]},"property-type":"data-constant"},"fill-extrusion-color":{"type":"color","default":"#000000","transition":true,"requires":[{"!":"fill-extrusion-pattern"}],"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-extrusion-translate":{"type":"array","value":"number","length":2,"default":[0,0],"transition":true,"units":"pixels","expression":{"interpolated":true,"parameters":["zoom"]},"property-type":"data-constant"},"fill-extrusion-translate-anchor":{"type":"enum","values":{"map":{},"viewport":{}},"default":"map","requires":["fill-extrusion-translate"],"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"},"fill-extrusion-pattern":{"type":"string","transition":true,"expression":{"interpolated":false,"parameters":["zoom","feature"]},"property-type":"cross-faded-data-driven"},"fill-extrusion-height":{"type":"number","default":0,"minimum":0,"units":"meters","transition":true,"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-extrusion-base":{"type":"number","default":0,"minimum":0,"units":"meters","transition":true,"requires":["fill-extrusion-height"],"expression":{"interpolated":true,"parameters":["zoom","feature","feature-state"]},"property-type":"data-driven"},"fill-extrusion-vertical-gradient":{"type":"boolean","default":true,"transition":false,"expression":{"interpolated":false,"parameters":["zoom"]},"property-type":"data-constant"}},
+	"paint_custom-webgl": {},
 	"property-type": {"data-driven":{"type":"property-type"},"cross-faded":{"type":"property-type"},"cross-faded-data-driven":{"type":"property-type"},"color-ramp":{"type":"property-type"},"data-constant":{"type":"property-type"},"constant":{"type":"property-type"}}
 };
 
@@ -6297,7 +6302,7 @@ function validateLayer(options) {
         } else {
             type = unbundle(parent.type);
         }
-    } else if (type !== 'background') {
+    } else if (type !== 'background' && type !== 'custom-webgl') {
         if (!layer.source) {
             errors.push(new ValidationError(key, layer, 'missing required property "source"'));
         } else {
@@ -6384,6 +6389,7 @@ function validateSource(options) {
     var type = unbundle(value.type);
     var errors;
     switch (type) {
+    case 'mbtiles':
     case 'vector':
     case 'raster':
     case 'raster-dem':
@@ -6464,12 +6470,14 @@ function validateSource(options) {
             value: value.type,
             valueSpec: {
                 values: [
+                    'mbtiles',
                     'vector',
                     'raster',
                     'raster-dem',
                     'geojson',
                     'video',
-                    'image'
+                    'image',
+                    'canvas'
                 ]
             },
             style: style,
@@ -7703,7 +7711,7 @@ var StyleLayer = (function (Evented$$1) {
         this.metadata = layer.metadata;
         this.minzoom = layer.minzoom;
         this.maxzoom = layer.maxzoom;
-        if (layer.type !== 'background') {
+        if (layer.type !== 'background' && layer.type !== 'custom-webgl') {
             this.source = layer.source;
             this.sourceLayer = layer['source-layer'];
             this.filter = layer.filter;
@@ -12440,6 +12448,21 @@ function projectQueryGeometry$1(queryGeometry, pixelPosMatrix, transform, z) {
     return projectedQueryGeometry;
 }
 
+var paint$6 = new Properties({});
+var properties$5 = { paint: paint$6 };
+
+var CustomWebGLLayer = (function (StyleLayer$$1) {
+    function CustomWebGLLayer(layer) {
+        StyleLayer$$1.call(this, layer, properties$5);
+    }
+
+    if ( StyleLayer$$1 ) CustomWebGLLayer.__proto__ = StyleLayer$$1;
+    CustomWebGLLayer.prototype = Object.create( StyleLayer$$1 && StyleLayer$$1.prototype );
+    CustomWebGLLayer.prototype.constructor = CustomWebGLLayer;
+
+    return CustomWebGLLayer;
+}(StyleLayer));
+
 var lineLayoutAttributes = createLayout([
     {
         name: 'a_pos_normal',
@@ -13064,7 +13087,7 @@ var layout$4 = new Properties({
     'line-miter-limit': new DataConstantProperty(spec['layout_line']['line-miter-limit']),
     'line-round-limit': new DataConstantProperty(spec['layout_line']['line-round-limit'])
 });
-var paint$6 = new Properties({
+var paint$7 = new Properties({
     'line-opacity': new DataDrivenProperty(spec['paint_line']['line-opacity']),
     'line-color': new DataDrivenProperty(spec['paint_line']['line-color']),
     'line-translate': new DataConstantProperty(spec['paint_line']['line-translate']),
@@ -13077,8 +13100,8 @@ var paint$6 = new Properties({
     'line-pattern': new CrossFadedDataDrivenProperty(spec['paint_line']['line-pattern']),
     'line-gradient': new ColorRampProperty(spec['paint_line']['line-gradient'])
 });
-var properties$5 = {
-    paint: paint$6,
+var properties$6 = {
+    paint: paint$7,
     layout: layout$4
 };
 
@@ -13107,11 +13130,11 @@ var LineFloorwidthProperty = (function (DataDrivenProperty$$1) {
 
     return LineFloorwidthProperty;
 }(DataDrivenProperty));
-var lineFloorwidthProperty = new LineFloorwidthProperty(properties$5.paint.properties['line-width'].specification);
+var lineFloorwidthProperty = new LineFloorwidthProperty(properties$6.paint.properties['line-width'].specification);
 lineFloorwidthProperty.useIntegerZoom = true;
 var LineStyleLayer = (function (StyleLayer$$1) {
     function LineStyleLayer(layer) {
-        StyleLayer$$1.call(this, layer, properties$5);
+        StyleLayer$$1.call(this, layer, properties$6);
     }
 
     if ( StyleLayer$$1 ) LineStyleLayer.__proto__ = StyleLayer$$1;
@@ -13904,7 +13927,7 @@ SymbolBucket.prototype.update = function update (states, vtLayer, imagePositions
     this.icon.programConfigurations.updatePaintArrays(states, vtLayer, this.layers, imagePositions);
 };
 SymbolBucket.prototype.isEmpty = function isEmpty () {
-    return this.symbolInstances.length === 0;
+    return !this.symbolInstances || this.symbolInstances.length === 0;
 };
 SymbolBucket.prototype.uploadPending = function uploadPending () {
     return !this.uploaded || this.text.programConfigurations.needsUpload || this.icon.programConfigurations.needsUpload;
@@ -14223,7 +14246,7 @@ var layout$5 = new Properties({
     'text-ignore-placement': new DataConstantProperty(spec['layout_symbol']['text-ignore-placement']),
     'text-optional': new DataConstantProperty(spec['layout_symbol']['text-optional'])
 });
-var paint$7 = new Properties({
+var paint$8 = new Properties({
     'icon-opacity': new DataDrivenProperty(spec['paint_symbol']['icon-opacity']),
     'icon-color': new DataDrivenProperty(spec['paint_symbol']['icon-color']),
     'icon-halo-color': new DataDrivenProperty(spec['paint_symbol']['icon-halo-color']),
@@ -14239,14 +14262,14 @@ var paint$7 = new Properties({
     'text-translate': new DataConstantProperty(spec['paint_symbol']['text-translate']),
     'text-translate-anchor': new DataConstantProperty(spec['paint_symbol']['text-translate-anchor'])
 });
-var properties$6 = {
-    paint: paint$7,
+var properties$7 = {
+    paint: paint$8,
     layout: layout$5
 };
 
 var SymbolStyleLayer = (function (StyleLayer$$1) {
     function SymbolStyleLayer(layer) {
-        StyleLayer$$1.call(this, layer, properties$6);
+        StyleLayer$$1.call(this, layer, properties$7);
     }
 
     if ( StyleLayer$$1 ) SymbolStyleLayer.__proto__ = StyleLayer$$1;
@@ -14296,16 +14319,16 @@ var SymbolStyleLayer = (function (StyleLayer$$1) {
     return SymbolStyleLayer;
 }(StyleLayer));
 
-var paint$8 = new Properties({
+var paint$9 = new Properties({
     'background-color': new DataConstantProperty(spec['paint_background']['background-color']),
     'background-pattern': new CrossFadedProperty(spec['paint_background']['background-pattern']),
     'background-opacity': new DataConstantProperty(spec['paint_background']['background-opacity'])
 });
-var properties$7 = { paint: paint$8 };
+var properties$8 = { paint: paint$9 };
 
 var BackgroundStyleLayer = (function (StyleLayer$$1) {
     function BackgroundStyleLayer(layer) {
-        StyleLayer$$1.call(this, layer, properties$7);
+        StyleLayer$$1.call(this, layer, properties$8);
     }
 
     if ( StyleLayer$$1 ) BackgroundStyleLayer.__proto__ = StyleLayer$$1;
@@ -14315,7 +14338,7 @@ var BackgroundStyleLayer = (function (StyleLayer$$1) {
     return BackgroundStyleLayer;
 }(StyleLayer));
 
-var paint$9 = new Properties({
+var paint$a = new Properties({
     'raster-opacity': new DataConstantProperty(spec['paint_raster']['raster-opacity']),
     'raster-hue-rotate': new DataConstantProperty(spec['paint_raster']['raster-hue-rotate']),
     'raster-brightness-min': new DataConstantProperty(spec['paint_raster']['raster-brightness-min']),
@@ -14325,11 +14348,11 @@ var paint$9 = new Properties({
     'raster-resampling': new DataConstantProperty(spec['paint_raster']['raster-resampling']),
     'raster-fade-duration': new DataConstantProperty(spec['paint_raster']['raster-fade-duration'])
 });
-var properties$8 = { paint: paint$9 };
+var properties$9 = { paint: paint$a };
 
 var RasterStyleLayer = (function (StyleLayer$$1) {
     function RasterStyleLayer(layer) {
-        StyleLayer$$1.call(this, layer, properties$8);
+        StyleLayer$$1.call(this, layer, properties$9);
     }
 
     if ( StyleLayer$$1 ) RasterStyleLayer.__proto__ = StyleLayer$$1;
@@ -14399,6 +14422,7 @@ var subclasses = {
     hillshade: HillshadeStyleLayer,
     fill: FillStyleLayer,
     'fill-extrusion': FillExtrusionStyleLayer,
+    'custom-webgl': CustomWebGLLayer,
     line: LineStyleLayer,
     symbol: SymbolStyleLayer,
     background: BackgroundStyleLayer,
@@ -16191,6 +16215,113 @@ DEMData.prototype.backfillBorder = function backfillBorder (borderTile, dx, dy) 
 };
 register('DEMData', DEMData);
 
+var RasterDEMTileSource = (function (RasterTileSource$$1) {
+    function RasterDEMTileSource(id, options, dispatcher, eventedParent) {
+        RasterTileSource$$1.call(this, id, options, dispatcher, eventedParent);
+        this.type = 'raster-dem';
+        this.maxzoom = 22;
+        this._options = extend({}, options);
+        this.encoding = options.encoding || 'mapbox';
+    }
+
+    if ( RasterTileSource$$1 ) RasterDEMTileSource.__proto__ = RasterTileSource$$1;
+    RasterDEMTileSource.prototype = Object.create( RasterTileSource$$1 && RasterTileSource$$1.prototype );
+    RasterDEMTileSource.prototype.constructor = RasterDEMTileSource;
+    RasterDEMTileSource.prototype.serialize = function serialize () {
+        return {
+            type: 'raster-dem',
+            url: this.url,
+            tileSize: this.tileSize,
+            tiles: this.tiles,
+            bounds: this.bounds,
+            encoding: this.encoding
+        };
+    };
+    RasterDEMTileSource.prototype.loadTile = function loadTile (tile, callback) {
+        var url = normalizeTileURL(tile.tileID.canonical.url(this.tiles, this.scheme), this.url, this.tileSize);
+        tile.request = getImage(this.map._transformRequest(url, ResourceType.Tile), imageLoaded.bind(this));
+        tile.neighboringTiles = this._getNeighboringTiles(tile.tileID);
+        function imageLoaded(err, img) {
+            delete tile.request;
+            if (tile.aborted) {
+                tile.state = 'unloaded';
+                callback(null);
+            } else if (err) {
+                tile.state = 'errored';
+                callback(err);
+            } else if (img) {
+                if (this.map._refreshExpiredTiles)
+                    { tile.setExpiryData(img); }
+                delete img.cacheControl;
+                delete img.expires;
+                var rawImageData = exported.getImageData(img);
+                var params = {
+                    uid: tile.uid,
+                    coord: tile.tileID,
+                    source: this.id,
+                    rawImageData: rawImageData,
+                    encoding: this.encoding
+                };
+                if (!tile.workerID || tile.state === 'expired') {
+                    tile.workerID = this.dispatcher.send('loadDEMTile', params, done.bind(this));
+                }
+            }
+        }
+        function done(err, dem) {
+            if (err) {
+                tile.state = 'errored';
+                callback(err);
+            }
+            if (dem) {
+                tile.dem = dem;
+                tile.needsHillshadePrepare = true;
+                tile.state = 'loaded';
+                callback(null);
+            }
+        }
+    };
+    RasterDEMTileSource.prototype._getNeighboringTiles = function _getNeighboringTiles (tileID) {
+        var canonical = tileID.canonical;
+        var dim = Math.pow(2, canonical.z);
+        var px = (canonical.x - 1 + dim) % dim;
+        var pxw = canonical.x === 0 ? tileID.wrap - 1 : tileID.wrap;
+        var nx = (canonical.x + 1 + dim) % dim;
+        var nxw = canonical.x + 1 === dim ? tileID.wrap + 1 : tileID.wrap;
+        var neighboringTiles = {};
+        neighboringTiles[new OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y).key] = { backfilled: false };
+        neighboringTiles[new OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y).key] = { backfilled: false };
+        if (canonical.y > 0) {
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y - 1).key] = { backfilled: false };
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, tileID.wrap, canonical.z, canonical.x, canonical.y - 1).key] = { backfilled: false };
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y - 1).key] = { backfilled: false };
+        }
+        if (canonical.y + 1 < dim) {
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y + 1).key] = { backfilled: false };
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, tileID.wrap, canonical.z, canonical.x, canonical.y + 1).key] = { backfilled: false };
+            neighboringTiles[new OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y + 1).key] = { backfilled: false };
+        }
+        return neighboringTiles;
+    };
+    RasterDEMTileSource.prototype.unloadTile = function unloadTile (tile) {
+        if (tile.demTexture)
+            { this.map.painter.saveTileTexture(tile.demTexture); }
+        if (tile.fbo) {
+            tile.fbo.destroy();
+            delete tile.fbo;
+        }
+        if (tile.dem)
+            { delete tile.dem; }
+        delete tile.neighboringTiles;
+        tile.state = 'unloaded';
+        this.dispatcher.send('removeDEMTile', {
+            uid: tile.uid,
+            source: this.id
+        }, undefined, tile.workerID);
+    };
+
+    return RasterDEMTileSource;
+}(RasterTileSource));
+
 var rasterBoundsAttributes = createLayout([
     {
         name: 'a_pos',
@@ -17448,6 +17579,132 @@ var RasterTileSourceOffline = (function (RasterTileSource$$1) {
     return RasterTileSourceOffline;
 }(RasterTileSource));
 
+var RasterDEMTileSourceOffline = (function (RasterDEMTileSource$$1) {
+    function RasterDEMTileSourceOffline(id, options, dispatcher, eventedParent) {
+        RasterDEMTileSource$$1.call(this, id, options, dispatcher, eventedParent);
+        this.id = id;
+        this.dispatcher = dispatcher;
+        this.setEventedParent(eventedParent);
+        this.type = 'raster-dem-offline';
+        this.minzoom = 0;
+        this.maxzoom = 22;
+        this.roundZoom = true;
+        this.scheme = 'xyz';
+        this.tileSize = 512;
+        this.imageFormat = 'png';
+        this._loaded = false;
+        this._options = extend({}, options);
+        extend(this, pick(options, [
+            'scheme',
+            'tileSize',
+            'imageFormat'
+        ]));
+        this._transparentPngUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
+        this.db = this.openDatabase(options.path);
+    }
+
+    if ( RasterDEMTileSource$$1 ) RasterDEMTileSourceOffline.__proto__ = RasterDEMTileSource$$1;
+    RasterDEMTileSourceOffline.prototype = Object.create( RasterDEMTileSource$$1 && RasterDEMTileSource$$1.prototype );
+    RasterDEMTileSourceOffline.prototype.constructor = RasterDEMTileSourceOffline;
+    RasterDEMTileSourceOffline.prototype.openDatabase = function openDatabase (dbLocation) {
+        return Database.openDatabase(dbLocation);
+    };
+    RasterDEMTileSourceOffline.prototype.copyDatabaseFile = function copyDatabaseFile (dbLocation, dbName, targetDir) {
+        return Database.copyDatabaseFile(dbLocation, dbName, targetDir);
+    };
+    RasterDEMTileSourceOffline.prototype.loadTile = function loadTile (tile, callback) {
+        tile.request = this._getImage(tile.tileID.canonical, done.bind(this));
+        tile.neighboringTiles = this._getNeighboringTiles(tile.tileID);
+        function done(err, img) {
+            delete tile.request;
+            if (tile.aborted) {
+                tile.state = 'unloaded';
+                callback(null);
+            } else if (err) {
+                if (this.url) {
+                    RasterDEMTileSource$$1.prototype.loadTile.call(this, tile, callback);
+                } else {
+                    tile.state = 'errored';
+                    callback(err);
+                }
+            } else if (img) {
+                if (this.map._refreshExpiredTiles)
+                    { tile.setExpiryData(img); }
+                delete img.cacheControl;
+                delete img.expires;
+                var rawImageData = exported.getImageData(img);
+                var params = {
+                    uid: tile.uid,
+                    coord: tile.tileID,
+                    source: this.id,
+                    rawImageData: rawImageData,
+                    encoding: this.encoding
+                };
+                if (!tile.workerID || tile.state === 'expired') {
+                    tile.workerID = this.dispatcher.send('loadDEMTile', params, done.bind(this));
+                }
+            }
+        }
+    };
+    RasterDEMTileSourceOffline.prototype._getBlob = function _getBlob (coord, callback) {
+        var this$1 = this;
+
+        var coordY = Math.pow(2, coord.z) - 1 - coord.y;
+        var query = 'SELECT BASE64(tile_data) AS base64_tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?';
+        var params = [
+            coord.z,
+            coord.x,
+            coordY
+        ];
+        var base64Prefix = 'data:image/' + this.imageFormat + ';base64,';
+        this.db.then(function (db) {
+            db.transaction(function (txn) {
+                txn.executeSql(query, params, function (tx, res) {
+                    if (res.rows.length) {
+                        callback(undefined, {
+                            data: base64Prefix + res.rows.item(0).base64_tile_data,
+                            cacheControl: null,
+                            expires: null
+                        });
+                    } else {
+                        if (this$1.url) {
+                            callback(new Error('tile ' + params.join(',') + ' not found'));
+                        } else {
+                            console.error('tile ' + params.join(',') + ' not found');
+                            callback(undefined, {
+                                data: this$1._transparentPngUrl,
+                                cacheControl: null,
+                                expires: null
+                            });
+                        }
+                    }
+                });
+            }, function (error) {
+                callback(error);
+            });
+        }).catch(function (err) {
+            callback(err);
+        });
+    };
+    RasterDEMTileSourceOffline.prototype._getImage = function _getImage (coord, callback) {
+        return this._getBlob(coord, function (err, imgData) {
+            if (err)
+                { return callback(err); }
+            var img = new window.Image();
+            var URL = window.URL || window.webkitURL;
+            img.onload = function () {
+                callback(null, img);
+                URL.revokeObjectURL(img.src);
+            };
+            img.cacheControl = imgData.cacheControl;
+            img.expires = imgData.expires;
+            img.src = imgData.data;
+        });
+    };
+
+    return RasterDEMTileSourceOffline;
+}(RasterDEMTileSource));
+
 exports.createCommonjsModule = createCommonjsModule;
 exports.Point = pointGeometry;
 exports.window = self;
@@ -17492,8 +17749,6 @@ exports.normalizeTileURL = normalizeTileURL;
 exports.postTurnstileEvent = postTurnstileEvent;
 exports.postMapLoadEvent = postMapLoadEvent;
 exports.TileBounds = TileBounds;
-exports.OverscaledTileID = OverscaledTileID;
-exports.RasterTileSource = RasterTileSource;
 exports.EXTENT = EXTENT;
 exports.CanonicalTileID = CanonicalTileID;
 exports.StructArrayLayout4i8 = StructArrayLayout4i8;
@@ -17503,6 +17758,8 @@ exports.MercatorCoordinate = MercatorCoordinate;
 exports.getVideo = getVideo;
 exports.ValidationError = ValidationError;
 exports.bindAll = bindAll;
+exports.raster = RasterTileSource;
+exports.rasterDem = RasterDEMTileSource;
 exports.create = create$3;
 exports.identity = identity$3;
 exports.invert = invert$3;
@@ -17513,6 +17770,7 @@ exports.rotateX = rotateX;
 exports.rotateZ = rotateZ;
 exports.perspective = perspective;
 exports.ortho = ortho;
+exports.OverscaledTileID = OverscaledTileID;
 exports.deepEqual = deepEqual;
 exports.Tile = Tile;
 exports.keysDifference = keysDifference;
@@ -17527,7 +17785,7 @@ exports.evaluateSizeForFeature = evaluateSizeForFeature;
 exports.evaluateSizeForZoom = evaluateSizeForZoom;
 exports.SIZE_PACK_FACTOR = SIZE_PACK_FACTOR;
 exports.addDynamicAttributes = addDynamicAttributes;
-exports.properties = properties$6;
+exports.properties = properties$7;
 exports.WritingMode = WritingMode;
 exports.polygonIntersectsBufferedPoint = polygonIntersectsBufferedPoint;
 exports.polygonIntersectsMultiPolygon = polygonIntersectsMultiPolygon;
@@ -17592,6 +17850,7 @@ exports.version = version;
 exports.setRTLTextPlugin = setRTLTextPlugin;
 exports.Database = Database;
 exports.RasterTileSourceOffline = RasterTileSourceOffline;
+exports.RasterDEMTileSourceOffline = RasterDEMTileSourceOffline;
 exports.values = values;
 exports.featureFilter = createFilter;
 exports.Anchor = Anchor;
@@ -18108,12 +18367,12 @@ TinyQueue.prototype.pop = function pop () {
     if (this.length === 0)
         { return undefined; }
     var top = this.data[0];
+    var bottom = this.data.pop();
     this.length--;
     if (this.length > 0) {
-        this.data[0] = this.data[this.length];
+        this.data[0] = bottom;
         this._down(0);
     }
-    this.data.pop();
     return top;
 };
 TinyQueue.prototype.peek = function peek () {
@@ -18746,7 +19005,7 @@ WorkerTile.prototype.parse = function parse (data, layerIndex, actor, callback) 
             var imageAtlas = new __chunk_1.ImageAtlas(iconMap, patternMap);
             for (var key in buckets) {
                 var bucket = buckets[key];
-                if (bucket instanceof __chunk_1.SymbolBucket) {
+                if (bucket.hasOwnProperty('collisionBoxArray')) {
                     recalculateLayers(bucket.layers, this$1.zoom);
                     performSymbolLayout(bucket, glyphMap, glyphAtlas.positions, iconMap, imageAtlas.iconPositions, this$1.showCollisionBoxes);
                 } else if (bucket.hasPattern && (bucket instanceof __chunk_1.LineBucket || bucket instanceof __chunk_1.FillBucket || bucket instanceof __chunk_1.FillExtrusionBucket)) {
@@ -20748,7 +21007,8 @@ var Worker$1 = function Worker(self) {
         vector: VectorTileWorkerSource,
         mbtiles: VectorTileWorkerSource,
         geojson: GeoJSONWorkerSource,
-        rasteroffline: __chunk_1.RasterTileSourceOffline
+        rasteroffline: __chunk_1.RasterTileSourceOffline,
+        'raster-dem-offline': __chunk_1.RasterDEMTileSourceOffline
     };
     this.workerSources = {};
     this.demWorkerSources = {};
@@ -21924,113 +22184,6 @@ var VectorTileSource = (function (Evented) {
     return VectorTileSource;
 }(__chunk_1.Evented));
 
-var RasterDEMTileSource = (function (RasterTileSource) {
-    function RasterDEMTileSource(id, options, dispatcher, eventedParent) {
-        RasterTileSource.call(this, id, options, dispatcher, eventedParent);
-        this.type = 'raster-dem';
-        this.maxzoom = 22;
-        this._options = __chunk_1.extend({}, options);
-        this.encoding = options.encoding || 'mapbox';
-    }
-
-    if ( RasterTileSource ) RasterDEMTileSource.__proto__ = RasterTileSource;
-    RasterDEMTileSource.prototype = Object.create( RasterTileSource && RasterTileSource.prototype );
-    RasterDEMTileSource.prototype.constructor = RasterDEMTileSource;
-    RasterDEMTileSource.prototype.serialize = function serialize () {
-        return {
-            type: 'raster-dem',
-            url: this.url,
-            tileSize: this.tileSize,
-            tiles: this.tiles,
-            bounds: this.bounds,
-            encoding: this.encoding
-        };
-    };
-    RasterDEMTileSource.prototype.loadTile = function loadTile (tile, callback) {
-        var url = __chunk_1.normalizeTileURL(tile.tileID.canonical.url(this.tiles, this.scheme), this.url, this.tileSize);
-        tile.request = __chunk_1.getImage(this.map._transformRequest(url, __chunk_1.ResourceType.Tile), imageLoaded.bind(this));
-        tile.neighboringTiles = this._getNeighboringTiles(tile.tileID);
-        function imageLoaded(err, img) {
-            delete tile.request;
-            if (tile.aborted) {
-                tile.state = 'unloaded';
-                callback(null);
-            } else if (err) {
-                tile.state = 'errored';
-                callback(err);
-            } else if (img) {
-                if (this.map._refreshExpiredTiles)
-                    { tile.setExpiryData(img); }
-                delete img.cacheControl;
-                delete img.expires;
-                var rawImageData = __chunk_1.browser.getImageData(img);
-                var params = {
-                    uid: tile.uid,
-                    coord: tile.tileID,
-                    source: this.id,
-                    rawImageData: rawImageData,
-                    encoding: this.encoding
-                };
-                if (!tile.workerID || tile.state === 'expired') {
-                    tile.workerID = this.dispatcher.send('loadDEMTile', params, done.bind(this));
-                }
-            }
-        }
-        function done(err, dem) {
-            if (err) {
-                tile.state = 'errored';
-                callback(err);
-            }
-            if (dem) {
-                tile.dem = dem;
-                tile.needsHillshadePrepare = true;
-                tile.state = 'loaded';
-                callback(null);
-            }
-        }
-    };
-    RasterDEMTileSource.prototype._getNeighboringTiles = function _getNeighboringTiles (tileID) {
-        var canonical = tileID.canonical;
-        var dim = Math.pow(2, canonical.z);
-        var px = (canonical.x - 1 + dim) % dim;
-        var pxw = canonical.x === 0 ? tileID.wrap - 1 : tileID.wrap;
-        var nx = (canonical.x + 1 + dim) % dim;
-        var nxw = canonical.x + 1 === dim ? tileID.wrap + 1 : tileID.wrap;
-        var neighboringTiles = {};
-        neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y).key] = { backfilled: false };
-        neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y).key] = { backfilled: false };
-        if (canonical.y > 0) {
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y - 1).key] = { backfilled: false };
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, tileID.wrap, canonical.z, canonical.x, canonical.y - 1).key] = { backfilled: false };
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y - 1).key] = { backfilled: false };
-        }
-        if (canonical.y + 1 < dim) {
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, pxw, canonical.z, px, canonical.y + 1).key] = { backfilled: false };
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, tileID.wrap, canonical.z, canonical.x, canonical.y + 1).key] = { backfilled: false };
-            neighboringTiles[new __chunk_1.OverscaledTileID(tileID.overscaledZ, nxw, canonical.z, nx, canonical.y + 1).key] = { backfilled: false };
-        }
-        return neighboringTiles;
-    };
-    RasterDEMTileSource.prototype.unloadTile = function unloadTile (tile) {
-        if (tile.demTexture)
-            { this.map.painter.saveTileTexture(tile.demTexture); }
-        if (tile.fbo) {
-            tile.fbo.destroy();
-            delete tile.fbo;
-        }
-        if (tile.dem)
-            { delete tile.dem; }
-        delete tile.neighboringTiles;
-        tile.state = 'unloaded';
-        this.dispatcher.send('removeDEMTile', {
-            uid: tile.uid,
-            source: this.id
-        }, undefined, tile.workerID);
-    };
-
-    return RasterDEMTileSource;
-}(__chunk_1.RasterTileSource));
-
 var GeoJSONSource = (function (Evented) {
     function GeoJSONSource(id, options, dispatcher, eventedParent) {
         Evented.call(this);
@@ -22599,8 +22752,8 @@ var CanvasSource = (function (ImageSource$$1) {
 
 var sourceTypes = {
     vector: VectorTileSource,
-    raster: __chunk_1.RasterTileSource,
-    'raster-dem': RasterDEMTileSource,
+    raster: __chunk_1.raster,
+    'raster-dem': __chunk_1.rasterDem,
     geojson: GeoJSONSource,
     video: VideoSource,
     image: ImageSource,
@@ -28922,6 +29075,27 @@ function drawExtrusionTiles(painter, source, layer, coords, depthMode, stencilMo
     }
 }
 
+function drawCustomWebGL(painter, sourceCache, layer) {
+    if (painter.renderPass !== 'translucent')
+        { return; }
+    function invalidateCurrentWebGLState() {
+        var context = painter.context;
+        Object.keys(context).forEach(function (key) {
+            if (context[key].current !== undefined) {
+                context[key].current = {};
+            }
+        });
+    }
+    var drawCallbacks = painter.customWebGLDrawCallbacks;
+    if (drawCallbacks.hasOwnProperty(layer.id)) {
+        var callback = drawCallbacks[layer.id];
+        if (callback) {
+            callback(painter.context.gl, invalidateCurrentWebGLState);
+            invalidateCurrentWebGLState();
+        }
+    }
+}
+
 function drawHillshade(painter, sourceCache, layer, tileIDs) {
     if (painter.renderPass !== 'offscreen' && painter.renderPass !== 'translucent')
         { return; }
@@ -32116,6 +32290,7 @@ var draw$1 = {
     line: drawLine,
     fill: drawFill,
     'fill-extrusion': draw,
+    'custom-webgl': drawCustomWebGL,
     hillshade: drawHillshade,
     raster: drawRaster,
     background: drawBackground,
@@ -32126,6 +32301,7 @@ var Painter = function Painter(gl, transform) {
     this.context = new Context(gl);
     this.transform = transform;
     this._tileTextures = {};
+    this.customWebGLDrawCallbacks = {};
     this.setup();
     this.numSublayers = SourceCache.maxUnderzooming + SourceCache.maxOverzooming + 1;
     this.depthEpsilon = 1 / Math.pow(2, 16);
@@ -32376,7 +32552,7 @@ Painter.prototype.setupOffscreenDepthRenderbuffer = function setupOffscreenDepth
 Painter.prototype.renderLayer = function renderLayer (painter, sourceCache, layer, coords) {
     if (layer.isHidden(this.transform.zoom))
         { return; }
-    if (layer.type !== 'background' && layer.type !== 'custom' && !coords.length)
+    if (layer.type !== 'background' && layer.type !== 'custom' && layer.type !== 'custom-webgl' && !coords.length)
         { return; }
     this.id = layer.id;
     draw$1[layer.type](painter, sourceCache, layer, coords);
@@ -32449,6 +32625,9 @@ Painter.prototype.setBaseState = function setBaseState () {
         this.height
     ]);
     this.context.blendEquation.set(gl.FUNC_ADD);
+};
+Painter.prototype.setCustomWebGLDrawCallback = function setCustomWebGLDrawCallback (id, callback) {
+    this.customWebGLDrawCallbacks[id] = callback;
 };
 
 function tileCover(z, bounds, actualZ, renderWorldCopies) {
@@ -35831,6 +36010,9 @@ var Map = (function (Camera$$1) {
         if (this._trackResize) {
             this.resize()._update();
         }
+    };
+    Map.prototype.setCustomWebGLDrawCallback = function setCustomWebGLDrawCallback (id, callback) {
+        this.painter.setCustomWebGLDrawCallback(id, callback);
     };
     prototypeAccessors.showTileBoundaries.get = function () {
         return !!this._showTileBoundaries;
@@ -39520,9 +39702,13 @@ var createEmptyMap = function (options) { return new Promise(function (resolve) 
         var rasterOfflineSourceLoaded = new Promise(function (resolve) {
             map.addSourceType('rasteroffline', __chunk_1.RasterTileSourceOffline, function () { return resolve(); });
         });
+        var rasterDEMOfflineSourceLoaded = new Promise(function (resolve) {
+            map.addSourceType('raster-dem-offline', __chunk_1.RasterDEMTileSourceOffline, function () { return resolve(); });
+        });
         Promise.all([
             mbTilesSourceLoaded,
-            rasterOfflineSourceLoaded
+            rasterOfflineSourceLoaded,
+            rasterDEMOfflineSourceLoaded
         ]).then(function () { return resolve(map); });
     });
 }); };
