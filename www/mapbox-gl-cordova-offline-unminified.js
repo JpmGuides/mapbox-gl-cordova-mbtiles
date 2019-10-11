@@ -1,4 +1,4 @@
-/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.3.0/LICENSE.txt */
+/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.3.1/LICENSE.txt */
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 typeof define === 'function' && define.amd ? define(factory) :
@@ -17613,9 +17613,9 @@ var RasterDEMTileSourceOffline = (function (RasterDEMTileSource$$1) {
         return Database.copyDatabaseFile(dbLocation, dbName, targetDir);
     };
     RasterDEMTileSourceOffline.prototype.loadTile = function loadTile (tile, callback) {
-        tile.request = this._getImage(tile.tileID.canonical, done.bind(this));
+        tile.request = this._getImage(tile.tileID.canonical, imageLoaded.bind(this));
         tile.neighboringTiles = this._getNeighboringTiles(tile.tileID);
-        function done(err, img) {
+        function imageLoaded(err, img) {
             delete tile.request;
             if (tile.aborted) {
                 tile.state = 'unloaded';
@@ -17643,6 +17643,18 @@ var RasterDEMTileSourceOffline = (function (RasterDEMTileSource$$1) {
                 if (!tile.workerID || tile.state === 'expired') {
                     tile.workerID = this.dispatcher.send('loadDEMTile', params, done.bind(this));
                 }
+            }
+        }
+        function done(err, dem) {
+            if (err) {
+                tile.state = 'errored';
+                callback(err);
+            }
+            if (dem) {
+                tile.dem = dem;
+                tile.needsHillshadePrepare = true;
+                tile.state = 'loaded';
+                callback(null);
             }
         }
     };
@@ -39576,6 +39588,10 @@ var MBTilesSource = (function (VectorTileSource$$1) {
                 txn.executeSql(query, params, function (tx, res) {
                     if (res.rows.length) {
                         var base64Data = res.rows.item(0).base64_tile_data;
+                        if (!base64Data) {
+                            callback(undefined, '');
+                            return;
+                        }
                         try {
                             var rawData = inflate_1$1.inflate(base64Js.toByteArray(base64Data));
                             callback(undefined, base64Js.fromByteArray(rawData));
@@ -39652,7 +39668,7 @@ var MBTilesSource = (function (VectorTileSource$$1) {
 }(VectorTileSource));
 
 var readJSON = function (url) { return new Promise(function (resolve, reject) {
-    var xhr = new __chunk_1.window.XMLHttpRequest();
+    var xhr = new window.XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.onerror = function (e) { return reject(e); };
@@ -39671,6 +39687,20 @@ var readJSON = function (url) { return new Promise(function (resolve, reject) {
     xhr.send();
     return xhr;
 }); };
+var originalFetch = window.fetch;
+function newFetch(resource, init) {
+    if (typeof resource.url == 'string' && resource.url.match(/^file:/)) {
+        return readJSON(resource.url).then(function (data) {
+            return {
+                ok: true,
+                json: function () { return Promise.resolve(data); },
+                headers: { get: function () { return ''; } }
+            };
+        });
+    }
+    return originalFetch(resource, init);
+}
+window.fetch = newFetch;
 var dereferenceStyle = function (options) {
     if (typeof options.style === 'string' || options.style instanceof String) {
         return readJSON(options.style).then(function (style) { return __chunk_1.extend({}, options, { style: style }); });
@@ -39681,7 +39711,7 @@ var dereferenceStyle = function (options) {
 var absoluteSpriteUrl = function (options) {
     var style = options.style;
     var hasProtocol = /^.+:\/\//;
-    var path = __chunk_1.window.location.origin + __chunk_1.window.location.pathname.split('/').slice(0, -1).join('/');
+    var path = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
     if ('sprite' in style && !style.sprite.match(hasProtocol) && 'glyphs' in style && !style.glyphs.match(hasProtocol)) {
         style.sprite = path + '/' + style.sprite;
         style.glyphs = path + '/' + style.glyphs;
