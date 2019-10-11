@@ -27,6 +27,11 @@ class MBTilesSource extends VectorTileSource {
                 txn.executeSql(query, params, function (tx, res) {
                     if (res.rows.length) {
                         const base64Data = res.rows.item(0).base64_tile_data;
+                        if (!base64Data) {
+                          callback(undefined, '');
+                          return;
+                        }
+
                         try {
                           const rawData = pako.inflate(base64js.toByteArray(base64Data));
                           callback(undefined, base64js.fromByteArray(rawData)); // Tile contents read, callback success.

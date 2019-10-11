@@ -38,11 +38,11 @@ class RasterDEMTileSourceOffline extends RasterDEMTileSource {
 
     loadTile(tile, callback) {
 
-        tile.request = this._getImage(tile.tileID.canonical, done.bind(this));
+        tile.request = this._getImage(tile.tileID.canonical, imageLoaded.bind(this));
 
         tile.neighboringTiles = this._getNeighboringTiles(tile.tileID);
 
-        function done(err, img) {
+        function imageLoaded(err, img) {
             delete tile.request;
 
             if (tile.aborted) {
@@ -76,10 +76,23 @@ class RasterDEMTileSourceOffline extends RasterDEMTileSource {
                 }
             }
         }
+
+        function done(err, dem) {
+            if (err) {
+                tile.state = 'errored';
+                callback(err);
+            }
+
+            if (dem) {
+                tile.dem = dem;
+                tile.needsHillshadePrepare = true;
+                tile.state = 'loaded';
+                callback(null);
+            }
+        }
     }
 
     _getBlob(coord, callback){
-
         const coordY = Math.pow(2, coord.z) -1 - coord.y;
 
         const query = 'SELECT BASE64(tile_data) AS base64_tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?';

@@ -38,8 +38,18 @@ function downloadToFile(url, file) {
   });
 }
 
-async function processStyle(styleName) {
-  const url = styleUrl(styleName);
+function makeJsonDataUrl(url) {
+  return 'data:application/json,' + encodeURIComponent(JSON.stringify(url));
+}
+
+async function processStyle(styleNameOrUrl) {
+  const url = styleUrl(styleNameOrUrl);
+
+  console.log('downloading:', url);
+
+  const style = await downloadJson(url);
+  const styleName = style.name;
+
   console.log('Preparing ' + styleName + ' from ' + url);
 
   const folder = 'www/styles/' + styleName;
@@ -47,9 +57,6 @@ async function processStyle(styleName) {
     await mkdir(folder);
   } catch(err) { }
 
-  console.log('downloading:', url);
-
-  const style = await downloadJson(url);
 
   for (let s in style.sources) {
     const source = style.sources[s];
@@ -59,20 +66,25 @@ async function processStyle(styleName) {
       //source.path = "data/2017-07-03_spain_barcelona.mbtiles",
       source.path = 'map.mbtiles';
       source.type = "mbtiles";
+      source.url = makeJsonDataUrl(await downloadJson(source.url));
     } else if (source.type == 'raster' && s == 'hillshading') {
       //source.path = "assets/offlinemap/hillshading.mbtiles";
       //source.path = "data/2016-11-28-hillshade-spain_barcelona.mbtiles",
       source.path = "hillshading.mbtiles";
       source.type = "rasteroffline";
+      source.url = makeJsonDataUrl(await downloadJson(source.url));
     } else if (source.type == 'vector' && s == 'contours') {
       source.path = "contours.mbtiles";
       source.type = "mbtiles";
+      source.url = makeJsonDataUrl(await downloadJson(source.url));
     } else if (source.type == 'vector' && s == 'landcover') {
       source.path = "landcover.mbtiles";
       source.type = "mbtiles";
+      source.url = makeJsonDataUrl(await downloadJson(source.url));
     } else if (source.type == 'raster-dem' && s == 'terrain-rgb') {
       source.path = "terrain-rgb.mbtiles";
       source.type = "raster-dem-offline";
+      source.url = makeJsonDataUrl(await downloadJson(source.url));
     } else {
       console.warn('WARNING: dont know how to handle source ' + s + ' of type ' + source.type);
     }

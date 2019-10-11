@@ -7,7 +7,7 @@ import RasterTileSourceOffline from "./raster_tile_offline_source"
 import RasterDEMTileSourceOffline from "./raster_dem_offline_tile_source"
 import Map from 'mapbox-gl/src/ui/map'
 import {extend} from 'mapbox-gl/src/util/util'
-import window from 'mapbox-gl/src/util/window'
+//import window from 'mapbox-gl/src/util/window'
 
 const readJSON = (url) => new Promise((resolve, reject) => {
     const xhr = new window.XMLHttpRequest();
@@ -29,6 +29,23 @@ const readJSON = (url) => new Promise((resolve, reject) => {
     xhr.send();
     return xhr;
 });
+
+const originalFetch = window.fetch;
+function newFetch(resource, init) {
+  if (typeof(resource.url) == 'string' && resource.url.match(/^file:/)) {
+    return readJSON(resource.url).then(function (data) {
+      return {
+        ok: true,
+        json: () => Promise.resolve(data),
+        headers: {
+          get: () => ''
+        }
+      };
+    });
+  }
+  return originalFetch(resource, init);
+}
+window.fetch = newFetch;
 
 const dereferenceStyle = (options) => {
     if (typeof options.style === 'string' || options.style instanceof String) {
