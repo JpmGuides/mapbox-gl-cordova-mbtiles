@@ -42,7 +42,7 @@ class RasterTileSourceOffline extends RasterTileSource {
         function done(err, img) {
             delete tile.request;
 
-            if (tile.aborted) {
+            if (tile.aborted && window.allowMapboxOfflineMapOnlineTile) {
                 tile.state = 'unloaded';
                 callback(null);
             } else if (err) {

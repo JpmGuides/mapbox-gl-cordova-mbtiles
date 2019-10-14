@@ -49,7 +49,7 @@ class RasterDEMTileSourceOffline extends RasterDEMTileSource {
                 tile.state = 'unloaded';
                 callback(null);
             } else if (err) {
-                if (this.url) {
+                if (this.url && window.allowMapboxOfflineMapOnlineTile) {
                   // Not in cache, try online.
                   super.loadTile(tile, callback);
                 } else {

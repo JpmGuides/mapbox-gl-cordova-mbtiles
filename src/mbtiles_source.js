@@ -63,7 +63,7 @@ class MBTilesSource extends VectorTileSource {
 
         function dispatch(err, base64Data) {
             if (err) {
-                if (this.url) {
+                if (this.url && window.allowMapboxOfflineMapOnlineTile) {
                   return super.loadTile(tile, callback);
                 } else {
                   return callback(err);
