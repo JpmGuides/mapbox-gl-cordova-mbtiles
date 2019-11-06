@@ -10,6 +10,7 @@ import RasterDEMTileSourceOffline from './raster_dem_offline_tile_source';
 import GeoJSONWorkerSource from 'mapbox-gl/src/source/geojson_worker_source';
 import assert from 'assert';
 import { plugin as globalRTLTextPlugin } from 'mapbox-gl/src/source/rtl_text_plugin';
+import {enforceCacheSizeLimit} from 'mapbox-gl/src/util/tile_request_cache';
 
 import type {
     WorkerSource,
@@ -31,6 +32,7 @@ export default class Worker {
     self: WorkerGlobalScopeInterface;
     actor: Actor;
     layerIndexes: { [string]: StyleLayerIndex };
+    availableImages: { [string]: Array<string> };
     workerSourceTypes: { [string]: Class<WorkerSource> };
     workerSources: { [string]: { [string]: { [string]: WorkerSource } } };
     demWorkerSources: { [string]: { [string]: RasterDEMTileWorkerSource } };
@@ -41,6 +43,7 @@ export default class Worker {
         this.actor = new Actor(self, this);
 
         this.layerIndexes = {};
+        this.availableImages = {};
 
         this.workerSourceTypes = {
             vector: VectorTileWorkerSource,
@@ -73,6 +76,11 @@ export default class Worker {
 
     setReferrer(mapID: string, referrer: string) {
         this.referrer = referrer;
+    }
+
+    setImages(mapId: string, images: Array<string>, callback: WorkerTileCallback) {
+        this.availableImages[mapId] = images;
+        callback();
     }
 
     setLayers(mapId: string, layers: Array<LayerSpecification>, callback: WorkerTileCallback) {
@@ -161,6 +169,16 @@ export default class Worker {
         }
     }
 
+    getAvailableImages(mapId: string) {
+        let availableImages = this.availableImages[mapId];
+
+        if (!availableImages) {
+            availableImages = [];
+        }
+
+        return availableImages;
+    }
+
     getLayerIndex(mapId: string) {
         let layerIndexes = this.layerIndexes[mapId];
         if (!layerIndexes) {
@@ -183,8 +201,7 @@ export default class Worker {
                     this.actor.send(type, data, callback, mapId);
                 }
             };
-
-            this.workerSources[mapId][type][source] = new (this.workerSourceTypes[type]: any)((actor: any), this.getLayerIndex(mapId));
+            this.workerSources[mapId][type][source] = new (this.workerSourceTypes[type]: any)((actor: any), this.getLayerIndex(mapId), this.getAvailableImages(mapId));
         }
 
         return this.workerSources[mapId][type][source];
@@ -199,6 +216,10 @@ export default class Worker {
         }
 
         return this.demWorkerSources[mapId][source];
+    }
+
+    enforceCacheSizeLimit(mapId: string, limit: number) {
+        enforceCacheSizeLimit(limit);
     }
 }
 

@@ -71,8 +71,9 @@ class RasterDEMTileSourceOffline extends RasterDEMTileSource {
                     encoding: this.encoding
                 };
 
-                if (!tile.workerID || tile.state === 'expired') {
-                    tile.workerID = this.dispatcher.send('loadDEMTile', params, done.bind(this));
+                if (!tile.actor || tile.state === 'expired') {
+                    tile.actor = this.dispatcher.getActor();
+                    tile.actor.send('loadDEMTile', params, done.bind(this));
                 }
             }
         }
